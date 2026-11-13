@@ -474,10 +474,3 @@ _INTENT_ROUTING[IntentCategory.YOUR_NEW_INTENT] = AgentType.YOUR_NEW_TYPE
 if req.intent in (IntentCategory.YOUR_NEW_INTENT,):
     scores[AgentType.YOUR_NEW_TYPE] += 0.75
 ```
-
----
-
-## **不同场景的共性改造建议**
-
-
-
