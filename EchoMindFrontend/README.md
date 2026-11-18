@@ -17,21 +17,21 @@
 - 支持聊天调试、健康检查、监控摘要、知识库检索、知识库文档导入、文件上传。
 - 支持 Docker + Nginx 部署。
 
-## 默认后端地址
+## 本地开发默认后端地址
 
 | 后端 | 默认地址 |
 |------|----------|
-| Python | `http://localhost:8000` |
+| Python | `http://localhost:8003` |
 | Java | `http://localhost:8080` |
 
 开发模式下，Vite 会代理：
 
 | 前端路径 | 代理到 |
 |----------|--------|
-| `/api/python` | `http://localhost:8000` |
+| `/api/python` | `http://localhost:8003` |
 | `/api/java` | `http://localhost:8080` |
 
-Docker 模式下，Nginx 会通过运行时注入的地址访问后端。默认仍指向宿主机上的 Python / Java 服务。
+前端项目自带的完整 Docker Compose 使用容器网络访问后端，其 Python 宿主机端口仍由该 Compose 文件单独配置。
 
 ## 本地运行
 
@@ -56,7 +56,7 @@ http://localhost:5175
 如果后端端口不是默认值，可以启动时覆盖：
 
 ```bash
-VITE_PYTHON_API_URL=http://localhost:8000 \
+VITE_PYTHON_API_URL=http://localhost:8003 \
 VITE_JAVA_API_URL=http://localhost:8080 \
 npm run dev
 ```
@@ -96,7 +96,7 @@ docker compose down
 Python 版默认：
 
 ```text
-http://localhost:8000
+http://localhost:8003
 ```
 
 Java 版默认：

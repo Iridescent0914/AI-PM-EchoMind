@@ -133,9 +133,9 @@ docker compose logs -f echomind
 
 | 入口 | 地址 | 用途 |
 |---|---|---|
-| Swagger | `http://localhost:8000/docs` | 查看接口、填写请求并执行 |
-| 健康检查 | `http://localhost:8000/health` | 确认应用已完成初始化 |
-| API | `http://localhost:8000` | 后端接口地址，如 `/chat` |
+| Swagger | `http://localhost:8003/docs` | 查看接口、填写请求并执行 |
+| 健康检查 | `http://localhost:8003/health` | 确认应用已完成初始化 |
+| API | `http://localhost:8003` | 后端接口地址，如 `/chat` |
 | Nginx | `http://localhost/docs` | 经反向代理访问 Swagger |
 | Prometheus | `http://localhost:9090` | 查询监控指标 |
 
@@ -149,7 +149,7 @@ docker compose logs -f echomind
 docker compose -f docker-compose.yml -f docker-compose.web.yml up -d --build
 ```
 
-此配置同时启动前端和 Java 后端，页面入口为 `http://localhost:5174` 或 `http://localhost`；Python API 保持 `http://localhost:8000`，Java API 为 `http://localhost:8080`。前端经同源路径代理请求，模型 Key 只传入后端。Java 使用本机既有数据卷 `echomindjava_app-data`；没有该卷时先执行 `docker volume create echomindjava_app-data`，也可通过 `ECHOMIND_JAVA_DATA_VOLUME` 指定另一个已有卷。后续启动、重建和停止这套环境时均携带上述两个 `-f` 参数。
+此配置同时启动前端和 Java 后端，页面入口为 `http://localhost:5174` 或 `http://localhost`；Python API 在本机的地址为 `http://localhost:8003`，Java API 为 `http://localhost:8080`。前端经同源路径代理请求，模型 Key 只传入后端。Java 使用本机既有数据卷 `echomindjava_app-data`；没有该卷时先执行 `docker volume create echomindjava_app-data`，也可通过 `ECHOMIND_JAVA_DATA_VOLUME` 指定另一个已有卷。后续启动、重建和停止这套环境时均携带上述两个 `-f` 参数。
 
 如果同时拥有前端和 Java 项目，按配套 Compose 的相对路径摆放：
 
@@ -283,7 +283,7 @@ docker compose up -d --force-recreate echomind
 `online_configured=true` 只表示已读取 Key。使用独立检查接口验证模板向量和问题向量，不需要聊天模型余额：
 
 ```bash
-curl -X POST http://localhost:8000/integrations/embedding/check \
+curl -X POST http://localhost:8003/integrations/embedding/check \
   -H 'Content-Type: application/json' \
   -d '{"message":"这笔钱能退给我吗？"}'
 ```
@@ -439,7 +439,7 @@ General、Technical Agent 可以按需查询该服务；Billing、Escalation 不
 
 ### 让其他 MCP 客户端访问 EchoMind
 
-连接地址为 **`http://localhost:8000/mcp/`**，保留末尾斜杠。当前提供：
+连接地址为 **`http://localhost:8003/mcp/`**，保留末尾斜杠。当前提供：
 
 - 工具：`search_local_knowledge(query, top_k)`。
 - 资源：`echomind://knowledge/stats`。
@@ -454,10 +454,10 @@ General、Technical Agent 可以按需查询该服务；Billing、Escalation 不
 
 ```bash
 # 重新加载规则
-curl -X POST http://localhost:8000/skills/reload
+curl -X POST http://localhost:8003/skills/reload
 
 # 查看加载结果与解析错误
-curl http://localhost:8000/skills
+curl http://localhost:8003/skills
 ```
 
 规则通过 Agent 类型和关键词匹配后注入，受字符预算限制；把关键约束放在前面。文件格式与字段说明见 [Skills 使用说明](skills/README.md)。Skills 用于处理规范，业务事实和产品资料更适合放入知识库。
