@@ -50,7 +50,7 @@ npm run dev
 访问：
 
 ```text
-http://localhost:5173
+http://localhost:5175
 ```
 
 如果后端端口不是默认值，可以启动时覆盖：
