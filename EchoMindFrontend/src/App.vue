@@ -25,7 +25,7 @@
         </button>
       </nav>
       <div class="rail-bottom">
-        <a class="docs-link" aria-label="API 文档" :href="docsUrl" target="_blank" rel="noreferrer">
+        <a v-if="!PYTHON_ONLY" class="docs-link" aria-label="API 文档" :href="docsUrl" target="_blank" rel="noreferrer">
           <AppIcon name="document" />
           <span>API 文档</span>
           <AppIcon name="northeast" />
@@ -56,7 +56,7 @@
             <i :class="healthOk ? 'online' : 'offline'"></i>
             {{ healthOk ? '已连接' : healthLabel === '未检查' ? '连接中' : '未连接' }}
           </span>
-          <div class="backend-tabs" aria-label="选择后端">
+          <div v-if="!PYTHON_ONLY" class="backend-tabs" aria-label="选择后端">
             <button
               v-for="backend in ['java', 'python']"
               :key="backend"
@@ -86,7 +86,7 @@
             <button class="icon-button" @click="clearConversation" aria-label="新对话" title="新对话">
               <AppIcon name="compose" />
             </button>
-            <button class="trace-toggle" @click="inspectorDialog.showModal()">
+            <button v-if="!PYTHON_ONLY" class="trace-toggle" @click="inspectorDialog.showModal()">
               <AppIcon name="panel" />
               <span>运行详情</span>
             </button>
@@ -195,7 +195,7 @@
               <p class="composer-note">AI 生成的内容可能不准确，请结合业务规则核实。</p>
             </div>
           </section>
-          <aside v-if="messages.length" class="inspector-desktop" aria-label="请求追踪与运行状态">
+          <aside v-if="messages.length && !PYTHON_ONLY" class="inspector-desktop" aria-label="请求追踪与运行状态">
             <div class="inspector-heading">
               <AppIcon name="panel" />
               <h2>运行详情</h2>
@@ -396,7 +396,7 @@
         </div>
       </section>
     </main>
-    <dialog ref="inspectorDialog" class="inspector-dialog" @click="closeOnBackdrop" aria-labelledby="inspector-title">
+    <dialog v-if="!PYTHON_ONLY" ref="inspectorDialog" class="inspector-dialog" @click="closeOnBackdrop" aria-labelledby="inspector-title">
       <div class="drawer-heading">
         <div>
           <AppIcon name="panel" />
@@ -467,6 +467,7 @@ import {
   addKnowledge,
   backendMeta,
   createInitialSettings,
+  PYTHON_ONLY,
   reloadSkills,
   requestChat,
   requestHealth,
@@ -506,11 +507,13 @@ const inspectorDialog = ref(null)
 const connectionDraft = reactive({ endpoint: '', userId: '', conversationId: '', pythonToken: '' })
 const pendingAction = ref('')
 const searched = ref(false)
-const views = [
-  { id: 'chat', label: '对话', icon: 'chat' },
-  { id: 'knowledge', label: '知识库', icon: 'book' },
-  { id: 'evaluation', label: '评测', icon: 'chart' }
-]
+const views = PYTHON_ONLY
+  ? [{ id: 'chat', label: '对话', icon: 'chat' }]
+  : [
+      { id: 'chat', label: '对话', icon: 'chat' },
+      { id: 'knowledge', label: '知识库', icon: 'book' },
+      { id: 'evaluation', label: '评测', icon: 'chart' }
+    ]
 const prompts = [
   { label: '退款申请', text: '我想申请退款，订单号是 #12345' },
   { label: '技术排查', text: '登录时提示错误，应该怎么排查？' },
@@ -604,6 +607,7 @@ async function copyMessage(content) {
 }
 
 function switchBackend(type) {
+  if (PYTHON_ONLY) return
   if (settings.backend === type) return
   searched.value = false
   requestState.invalidate()
@@ -625,6 +629,10 @@ function switchBackend(type) {
 }
 
 async function refreshConsole() {
+  if (PYTHON_ONLY) {
+    await checkHealth()
+    return
+  }
   await Promise.allSettled([checkHealth(), loadStats(), loadMonitor(), loadSkills()])
 }
 
@@ -709,13 +717,13 @@ async function sendMessage() {
       settings.conversationId = response.conversationId
       persist()
     }
-    const trace = await loadToolTrace(response.requestId, request)
+    const trace = PYTHON_ONLY ? null : await loadToolTrace(response.requestId, request)
     if (!request.isCurrent()) return
     lastResponse.value = response
     lastTrace.value = trace
     const meta = [response.intent, response.primaryAgent || response.agentType, response.knowledgeUsed ? 'RAG' : '', response.escalated ? '转人工' : ''].filter(Boolean).join(' · ')
     messages.value.push({ id: createMessageId(), role: 'assistant', content: response.response, meta, trace: lastTrace.value?.trace || null })
-    await loadMonitor()
+    if (!PYTHON_ONLY) await loadMonitor()
   } catch (error) {
     if (!request.isCurrent()) return
     messages.value.push({ id: createMessageId(), role: 'assistant', content: error.message, meta: '请求失败', error: true })

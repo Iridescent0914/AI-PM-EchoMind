@@ -1,4 +1,6 @@
 import { pollEvaluation } from './evaluationJobs.js'
+export const PYTHON_ONLY = import.meta.env.VITE_PYTHON_ONLY === 'true'
+
 const DEFAULT_BACKENDS = {
   python: {
     id: 'python',
@@ -18,7 +20,7 @@ export function createInitialSettings() {
   const saved = readSettings()
   return {
     pythonToken: '',
-    backend: saved.backend || import.meta.env.VITE_DEFAULT_BACKEND || 'python',
+    backend: PYTHON_ONLY ? 'python' : (saved.backend || import.meta.env.VITE_DEFAULT_BACKEND || 'python'),
     userId: saved.userId || 'u1001',
     conversationId: saved.conversationId || '',
     endpoints: {
