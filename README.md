@@ -296,6 +296,24 @@ general = 低
 - 使用 LLM-as-Judge 评价回复质量
 - 输出回归风险和优化建议
 
+
+问答：
+![alt text](image-1.png)
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
+
+rag知识库：
+![alt text](image-2.png)
+
+skills：
+![alt text](image-3.png)
+
+系统内部的评测：
+![alt text](image.png)
+
+
 ## 12. 简历与面试表达
 
 ### 项目标题
